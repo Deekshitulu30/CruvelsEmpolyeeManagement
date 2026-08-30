@@ -1,0 +1,56 @@
+name: Security Audit & Automated Dependency Scanning
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run weekly dependency audit every Monday at midnight
+    - cron: '0 0 * * 1'
+
+jobs:
+  security-scan:
+    name: Dependency Audit & Secret Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Audit Backend Dependencies
+        run: |
+          echo "Scanning backend dependencies for known CVEs..."
+          npm audit --audit-level=high
+
+      - name: Audit Frontend Dependencies
+        working-directory: ./frontend
+        run: |
+          echo "Scanning frontend dependencies for known CVEs..."
+          npm audit --audit-level=high
+
+      - name: Run Secret Detection (TruffleHog)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Test Suite
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci_test_secret_key_12345
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: cruvels_test_db
+        run: npm test

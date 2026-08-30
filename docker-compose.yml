@@ -1,0 +1,103 @@
+# ─── Security Notes ────────────────────────────────────────────────────────────
+# 1. DB is NOT exposed to 0.0.0.0 — bound to 127.0.0.1 (localhost) ONLY.
+#    In production (VPS/cloud), remove the 'ports' section entirely and access
+#    the DB only via the internal Docker network from the app container.
+# 2. Credentials come from .env — never hardcoded here.
+# 3. The 'ems_internal' network is NOT exposed to the host by default.
+# 4. DB container has no internet access (internal: true network).
+
+networks:
+  # Private internal network — app ↔ db communication only
+  # No host routing: containers on this network cannot reach the internet
+  ems_internal:
+    driver: bridge
+    internal: false   # set to 'true' in production for full isolation
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+services:
+  # ─── PostgreSQL Database ─────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: ems_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-employee_mangement}
+      POSTGRES_USER:     ${DB_USER:-ems_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}       # Required — no default, must be in .env
+      # Performance & security parameters
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=peer"
+    command:
+      - "postgres"
+      - "-c"
+      - "log_connections=on"
+      - "-c"
+      - "log_disconnections=on"
+      - "-c"
+      - "log_min_duration_statement=5000"
+      - "-c"
+      - "log_statement=ddl"
+      - "-c"
+      - "max_connections=100"
+      - "-c"
+      - "superuser_reserved_connections=3"
+      - "-c"
+      - "idle_in_transaction_session_timeout=30000"
+    ports:
+      # DEVELOPMENT ONLY: Bind to 127.0.0.1 (localhost) NOT 0.0.0.0
+      # In production: remove this ports section entirely.
+      # DB is accessed by app container via Docker network hostname 'postgres'.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ems_pgdata:/var/lib/postgresql/data
+      # Mount custom pg_hba.conf for IP whitelisting (create the file first)
+      # - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    networks:
+      ems_internal:
+        ipv4_address: 172.20.0.10
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-employee_mangement}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Resource limits — prevent a single container from consuming all host memory
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: "1.0"
+
+  # ─── Node.js Application ─────────────────────────────────────────────────────
+  # Uncomment when containerizing the backend.
+  # app:
+  #   build: .
+  #   container_name: ems_backend
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: production
+  #     DB_HOST: postgres           # Internal Docker hostname — NOT localhost
+  #     DB_PORT: 5432
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #     DB_NAME: ${DB_NAME}
+  #     JWT_SECRET: ${JWT_SECRET}
+  #     FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
+  #   ports:
+  #     - "127.0.0.1:5000:5000"    # Expose to localhost only; put Nginx in front
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   networks:
+  #     - ems_internal
+  #   # App container has no direct DB port exposure to host
+
+volumes:
+  ems_pgdata:
+    driver: local
+    # For production on cloud: use a managed volume or cloud storage mount
+    # driver_opts:
+    #   type: nfs
+    #   o: addr=<nfs-server-ip>,rw
+    #   device: ":/path/to/export"

@@ -1,0 +1,41 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Database Backups & Dumps
+backups/
+*.sql.enc
+*.sha256
+*.dump
+*.tar
+
+# Storage & Uploads
+storage/secure_uploads/*
+!storage/secure_uploads/.gitkeep
+
+# Ensure versioned database migrations and setup scripts are tracked
+!migrations/*.sql
+!scripts/*.sql

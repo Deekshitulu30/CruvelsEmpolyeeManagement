@@ -1,0 +1,22 @@
+rules:
+  - id: detect-raw-sql-concatenation
+    languages: [javascript, typescript]
+    message: "Potential SQL Injection: Avoid concatenating raw strings into database query calls. Use parameterized queries ($1, $2)."
+    severity: ERROR
+    patterns:
+      - pattern: db.query(`... ${$VAR} ...`)
+
+  - id: detect-eval-execution
+    languages: [javascript, typescript]
+    message: "Dangerous execution: Use of eval() or Function constructor is strictly prohibited."
+    severity: ERROR
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: detect-hardcoded-jwt-secrets
+    languages: [javascript, typescript]
+    message: "Security violation: Never hardcode JWT secrets in source code. Use process.env.JWT_SECRET."
+    severity: WARNING
+    patterns:
+      - pattern: jwt.sign($PAYLOAD, "...", ...)

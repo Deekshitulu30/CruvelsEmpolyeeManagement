@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PeopleOS - Create Workspace</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#464555",
+                        "surface-bright": "#f8f9fa",
+                        "on-primary-container": "#dad7ff",
+                        "primary-container": "#4f46e5",
+                        "secondary-fixed-dim": "#c0c6db",
+                        "tertiary-container": "#59606e",
+                        "on-background": "#191c1d",
+                        "primary-fixed": "#e2dfff",
+                        "surface": "#f8f9fa",
+                        "on-secondary-fixed": "#141b2b",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#151c27",
+                        "background": "#f8f9fa",
+                        "surface-variant": "#e1e3e4",
+                        "tertiary-fixed-dim": "#c0c7d6",
+                        "secondary": "#575e70",
+                        "primary": "#3525cd",
+                        "tertiary-fixed": "#dce2f3",
+                        "on-surface": "#191c1d",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d9dadb",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#c3c0ff",
+                        "surface-container-high": "#e7e8e9",
+                        "secondary-container": "#d9dff5",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary-container": "#5c6274",
+                        "on-tertiary-fixed-variant": "#404754",
+                        "surface-tint": "#4d44e3",
+                        "on-secondary-fixed-variant": "#404758",
+                        "outline-variant": "#c7c4d8",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e1e3e4",
+                        "secondary-fixed": "#dce2f7",
+                        "surface-container": "#edeeef",
+                        "on-error": "#ffffff",
+                        "tertiary": "#414855",
+                        "on-tertiary-container": "#d4dbeb",
+                        "outline": "#777587",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-primary-fixed": "#0f0069"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "display-hero-mobile": ["Geist"],
+                        "mono-data": ["Geist"],
+                        "body-md": ["Inter"],
+                        "headline-section": ["Geist"],
+                        "headline-page": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "display-hero": ["Geist"],
+                        "label-caps": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-hero-mobile": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "mono-data": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-section": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-page": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-hero": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        h1, h2, h3, h4, h5, h6, .font-headline-page, .font-headline-section, .font-display-hero, .font-label-caps {
+            font-family: 'Geist', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row w-full bg-surface-container-lowest">
+<!-- Split Screen: Left Side (Form) -->
+<div class="w-full md:w-1/2 flex flex-col justify-center px-margin-mobile md:px-margin-desktop lg:px-[120px] py-16 min-h-screen relative z-10 bg-surface-container-lowest">
+<!-- Logo -->
+<div class="mb-12">
+<img alt="PeopleOS Logo" class="w-12 h-12 object-contain rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO7DJRgzg6xKy_4iYo5AwtTO-8j5ihRCVhQYqykveN-jb7xm9vHESIhyTwWTZvoKQH00IozV7cP8h8L-ymgN5wGdTCNxphRyOC8oWwckiHYZ5E1gsVNQ8iYRsYY2-O_ZdbrGug-XFE5R55J1drZR_TnQPfJUDrtrmzPrllqzvFvsKTNuPpBQyJa2OVeuZ68amtQGpVcTofItHdiZIAmNLKS7zN1z0MBlfzew0qnkAmxBwWMWSGC9G1"/>
+</div>
+<div class="max-w-md w-full mx-auto md:mx-0">
+<!-- Headline -->
+<h1 class="font-headline-page text-headline-page text-on-surface mb-2">Create your PeopleOS workspace</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">Join thousands of high-growth organizations managing their workforce effortlessly.</p>
+<!-- Form -->
+<form action="#" class="space-y-4" method="POST">
+<!-- Name Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="first_name">First Name</label>
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow" id="first_name" name="first_name" placeholder="Jane" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="last_name">Last Name</label>
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow" id="last_name" name="last_name" placeholder="Doe" required="" type="text"/>
+</div>
+</div>
+<!-- Work Email -->
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="email">Work Email</label>
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow" id="email" name="email" placeholder="jane@company.com" required="" type="email"/>
+</div>
+<!-- Password Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="password">Password</label>
+<div class="relative">
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow pr-10" id="password" name="password" required="" type="password"/>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-outline cursor-pointer hover:text-primary transition-colors text-[20px]">visibility_off</span>
+</div>
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="confirm_password">Confirm Password</label>
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow" id="confirm_password" name="confirm_password" required="" type="password"/>
+</div>
+</div>
+<!-- Company & Role Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="company">Company Name</label>
+<input class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface transition-shadow" id="company" name="company" placeholder="Acme Corp" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase" for="role">Role</label>
+<div class="relative">
+<select class="w-full px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-body-md text-body-md text-on-surface appearance-none transition-shadow pr-10" id="role" name="role">
+<option selected="" value="EMPLOYEE">Employee</option>
+<option value="MANAGER">Manager</option>
+<option value="ADMIN">Administrator</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-outline pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Terms -->
+<div class="pt-2">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        By creating an account, you agree to our <a class="text-primary hover:underline font-semibold" href="#">Terms of Service</a> and <a class="text-primary hover:underline font-semibold" href="#">Privacy Policy</a>.
+                    </p>
+</div>
+<!-- Submit Button -->
+<div class="pt-4">
+<button class="w-full bg-primary-container text-on-primary-container font-body-md text-body-md font-semibold py-3 px-4 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 group" type="submit">
+                        Create account
+                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Login Link -->
+<div class="mt-8 text-center md:text-left">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Already have an account? <a class="text-primary hover:underline font-semibold" href="/login">Log in</a>
+</p>
+</div>
+</div>
+</div>
+<!-- Split Screen: Right Side (Visual/Brand) -->
+<div class="hidden md:flex w-1/2 bg-surface relative overflow-hidden flex-col justify-between border-l border-outline-variant/30">
+<!-- Decorative Background Pattern (Tailwind based) -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(theme('colors.outline-variant') 1px, transparent 1px); background-size: 24px 24px;"></div>
+<!-- Large Gradient Orb -->
+<div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary-container/10 blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-secondary-container/20 blur-[120px] pointer-events-none"></div>
+<!-- Content overlay -->
+<div class="relative z-10 flex flex-col h-full justify-center p-16 lg:p-24">
+<div class="max-w-lg">
+<div class="inline-flex items-center justify-center p-3 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/50 mb-8">
+<span class="material-symbols-outlined text-primary text-[32px]">insights</span>
+</div>
+<h2 class="font-headline-page text-[48px] leading-[56px] tracking-[-0.03em] font-bold text-on-surface mb-6">
+                    Intelligent workforce management, <br/> engineered for scale.
+                </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-12">
+                    Experience a platform designed with premium professionalism. Streamline operations, empower your team, and focus on growth.
+                </p>
+<!-- Bento-style feature highlight -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/50 shadow-sm flex flex-col gap-3 transition-transform hover:-translate-y-1 duration-300">
+<span class="material-symbols-outlined text-tertiary">groups</span>
+<h3 class="font-headline-section text-[16px] leading-[24px] font-semibold text-on-surface">Unified Directory</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Centralized employee data at your fingertips.</p>
+</div>
+<div class="bg-surface-container-lowest/80 backdrop-blur-md p-6 rounded-xl border border-outline-variant/50 shadow-sm flex flex-col gap-3 transition-transform hover:-translate-y-1 duration-300">
+<span class="material-symbols-outlined text-tertiary">security</span>
+<h3 class="font-headline-section text-[16px] leading-[24px] font-semibold text-on-surface">Enterprise Security</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bank-grade encryption and access controls.</p>
+</div>
+</div>
+</div>
+<!-- Testimonial / Social Proof -->
+<div class="mt-auto pt-16">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border-2 border-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">person</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container border-2 border-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">person_3</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-variant border-2 border-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">person_4</span>
+</div>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium">Trusted by 10,000+ HR professionals</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
