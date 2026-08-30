@@ -16,63 +16,75 @@ CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
 -- ems_backup   : backup service — SELECT + pg_dump access
 
 DO $$
+DECLARE
+    curr_db TEXT;
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_app') THEN
-        CREATE ROLE ems_app LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_ems_app';
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_readonly') THEN
-        CREATE ROLE ems_readonly LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_readonly';
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_backup') THEN
-        CREATE ROLE ems_backup LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_backup';
-    END IF;
+    SELECT current_database() INTO curr_db;
+
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_app') THEN
+            CREATE ROLE ems_app LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_ems_app';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_readonly') THEN
+            CREATE ROLE ems_readonly LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_readonly';
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ems_backup') THEN
+            CREATE ROLE ems_backup LOGIN PASSWORD 'CHANGE_IN_PRODUCTION_backup';
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not create auxiliary roles: %', SQLERRM;
+    END;
+
+    BEGIN
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO ems_app', curr_db);
+        GRANT USAGE ON SCHEMA public TO ems_app;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ems_app;
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ems_app;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ems_app;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ems_app;
+        REVOKE CREATE ON SCHEMA public FROM ems_app;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not grant ems_app permissions: %', SQLERRM;
+    END;
+
+    BEGIN
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO ems_readonly', curr_db);
+        GRANT USAGE ON SCHEMA public TO ems_readonly;
+        GRANT SELECT ON ALL TABLES IN SCHEMA public TO ems_readonly;
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ems_readonly;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not grant ems_readonly permissions: %', SQLERRM;
+    END;
+
+    BEGIN
+        EXECUTE format('GRANT CONNECT ON DATABASE %I TO ems_backup', curr_db);
+        GRANT USAGE ON SCHEMA public TO ems_backup;
+        GRANT SELECT ON ALL TABLES IN SCHEMA public TO ems_backup;
+        GRANT pg_read_all_data TO ems_backup;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not grant ems_backup permissions: %', SQLERRM;
+    END;
+
+    BEGIN
+        ALTER ROLE ems_app SET statement_timeout = '30s';
+        ALTER ROLE ems_readonly SET statement_timeout = '60s';
+        ALTER ROLE ems_backup SET statement_timeout = '0';
+        ALTER ROLE ems_app CONNECTION LIMIT 20;
+        ALTER ROLE ems_readonly CONNECTION LIMIT 5;
+        ALTER ROLE ems_backup CONNECTION LIMIT 2;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not alter role limits: %', SQLERRM;
+    END;
+
+    BEGIN
+        REVOKE EXECUTE ON FUNCTION pg_read_file(text) FROM PUBLIC;
+        REVOKE EXECUTE ON FUNCTION pg_read_file(text, bigint, bigint) FROM PUBLIC;
+        REVOKE EXECUTE ON FUNCTION pg_ls_dir(text) FROM PUBLIC;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not revoke system function execution: %', SQLERRM;
+    END;
 END
 $$;
-
--- ─── 3. GRANT TABLE PERMISSIONS (ems_app — CRUD only) ─────────────────────────
-GRANT CONNECT ON DATABASE employee_mangement TO ems_app;
-GRANT USAGE ON SCHEMA public TO ems_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ems_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ems_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ems_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO ems_app;
-
--- Explicitly deny DDL — ems_app cannot drop or alter tables
-REVOKE CREATE ON SCHEMA public FROM ems_app;
-
--- ─── 4. READ-ONLY ROLE (ems_readonly — analytics/reporting) ───────────────────
-GRANT CONNECT ON DATABASE employee_mangement TO ems_readonly;
-GRANT USAGE ON SCHEMA public TO ems_readonly;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO ems_readonly;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO ems_readonly;
-
--- ─── 5. BACKUP ROLE (ems_backup — pg_dump access) ─────────────────────────────
-GRANT CONNECT ON DATABASE employee_mangement TO ems_backup;
-GRANT USAGE ON SCHEMA public TO ems_backup;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO ems_backup;
--- pg_dump requires these system catalog permissions
-GRANT pg_read_all_data TO ems_backup;
-
--- ─── 6. QUERY TIMEOUT LIMITS PER ROLE (Prevents resource-exhaustion attacks) ──
--- ems_app: 30-second max per statement
-ALTER ROLE ems_app SET statement_timeout = '30s';
--- ems_readonly: 60-second max (analytics queries can be heavier)
-ALTER ROLE ems_readonly SET statement_timeout = '60s';
--- ems_backup: no timeout (full dumps can be long-running)
-ALTER ROLE ems_backup SET statement_timeout = '0';
-
--- ─── 7. CONNECTION LIMITS PER ROLE ────────────────────────────────────────────
-ALTER ROLE ems_app CONNECTION LIMIT 20;
-ALTER ROLE ems_readonly CONNECTION LIMIT 5;
-ALTER ROLE ems_backup CONNECTION LIMIT 2;
-
--- ─── 8. REVOKE DANGEROUS CAPABILITIES ────────────────────────────────────────
--- Prevent file read/write via SQL (INTO OUTFILE, COPY TO/FROM file)
--- In PostgreSQL, only superusers can COPY to files — ems_app is not a superuser.
--- Explicitly document and enforce: pg_execute_server_program is not granted.
-REVOKE EXECUTE ON FUNCTION pg_read_file(text) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION pg_read_file(text, bigint, bigint) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION pg_ls_dir(text) FROM PUBLIC;
 
 -- ─── 9. ROW-LEVEL SECURITY (RLS) ─────────────────────────────────────────────
 -- RLS enforces that the application layer cannot accidentally leak cross-user data.

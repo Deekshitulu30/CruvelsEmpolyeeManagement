@@ -22,17 +22,6 @@ async function migrate() {
             );
         `);
 
-        // Check if initial tables exist
-        const checkTables = await client.query(`
-            SELECT 1 FROM information_schema.tables WHERE table_name = 'users';
-        `);
-        if (checkTables.rows.length > 0) {
-            await client.query(`
-                INSERT INTO _migrations (name) VALUES ('001_initial_schema.sql')
-                ON CONFLICT (name) DO NOTHING;
-            `);
-        }
-
         const migrationsDir = path.join(__dirname, 'migrations');
         const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
 
